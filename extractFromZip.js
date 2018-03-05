@@ -9,10 +9,11 @@
 var JSZip = require('jszip');
 
 /* Input is one zip files in memory, and a comma separated file of files to extract.  The returned 'newZipfile' is already in Zip format, ready to be written to disk or S3. */
-module.exports = function extractFromZip(zipcontent, filenames, callback/* (err,newZipfile) */) {
+module.exports = function extractFromZip(zipcontent, filenames, targetnames, callback/* (err,newZipfile) */) {
 
   console.log('type = ' + typeof(filenames));
   const list = filenames.split(',');
+  const listout = targetnames.split(',');
   const outputZip = new JSZip();
 
   JSZip.loadAsync(zipcontent).then(function(inputZip) {
@@ -35,6 +36,8 @@ module.exports = function extractFromZip(zipcontent, filenames, callback/* (err,
 
       // Copy the next required file from inputZip to outputZip.
       var name = list[index].trim()
+      var destname = listout[index].trim()
+      if (!destname) { destname = name }
       console.log(`    - ${name}`);
       var file = inputZip.file(name);
       if (!file) {
@@ -45,7 +48,7 @@ module.exports = function extractFromZip(zipcontent, filenames, callback/* (err,
         // console.log('  content:', content);
 
         // Add the file into the first zip
-        outputZip.file(name, content, {
+        outputZip.file(destname, content, {
           date: file.date,
           unixPermissions: file.unixPermissions,
           dosPermissions: file.dosPermissions,

@@ -93,12 +93,12 @@ exports.handler = (event, context, callback) => {
   /*
    *  Check parameters to this Lambda.
    */
-  const filenames = job.data.actionConfiguration.configuration.UserParameters;
-  if (!filenames) {
-    const message = `Error: lambda expects UserParameters to be a comma separated list of file names.`;
+  const inputJson = job.data.actionConfiguration.configuration.UserParameters;
+  if (!inputJson) {
+    const message = `Error: lambda expects UserParameters to be a json consisting of input and output names`;
     return notifyFailure(null, message);
   }
-  console.log('UserParameters used as filenames: ' + filenames);
+  console.log('UserParameters json object: ' + filenames);
   const inputArtifacts = job.data.inputArtifacts;
   if (!inputArtifacts || inputArtifacts.length != 1) {
     const message = `Error: lambda expects event['CodePipeline.job'].data.inputArtifacts to have one entry.`;
@@ -123,6 +123,13 @@ exports.handler = (event, context, callback) => {
   // https://reformatcode.com/code/nodejs/extract-a-kms-encrypted-zip-file-from-aws-s3
   const credentials = job.data.artifactCredentials;
   const s3 = new AWS.S3({apiVersion: '2006-03-01', credentials: credentials});
+
+  /*
+   *  Import json variables
+   */
+  var userParameters = JSON.parse(inputJson);
+  var filenames = userParameters.map(function(val) {return val.source;}).join(',');
+  var targetnames = userParameters.map(function(val) {return val.target;}).join(',');
 
   /*
    *  Load the input artifact
@@ -166,7 +173,7 @@ exports.handler = (event, context, callback) => {
        *  Extract the second zip file from the first.
        */
     //const filenames = 'Deploy.zip'
-    extractFromZip(content1, filenames, function(err, outputContent) {
+    extractFromZip(content1, filenames, targetnames, function(err, outputContent) {
       if (err) {
         const message = `Error while extracting Zip files.`
         return notifyFailure(message, err);
