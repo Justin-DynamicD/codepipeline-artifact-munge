@@ -95,7 +95,7 @@ exports.handler = (event, context, callback) => {
    */
   const insertPath = job.data.actionConfiguration.configuration.UserParameters;
   if (!insertPath) {
-    insertPath = ''
+    insertPath = 'root'
   }
   console.log('UserParameters used as insertPath: ' + insertPath);
   const inputArtifacts = job.data.inputArtifacts;

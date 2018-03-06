@@ -63,7 +63,7 @@ module.exports = function mergeIntoZip(zipfile1, zipfile2, insertPath, callback/
           // console.log('  content:', content);
           
           // ensure slash is only injected if insertPath is present
-          if (insertPath == '') {
+          if (insertPath == 'root') {
             var insertName = name 
           } else {
             var insertName = insertPath + '/' + name
