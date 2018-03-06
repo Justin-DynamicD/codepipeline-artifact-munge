@@ -61,9 +61,16 @@ module.exports = function mergeIntoZip(zipfile1, zipfile2, insertPath, callback/
         var file = zip2.file(name);
         file.async("string").then(content => {
           // console.log('  content:', content);
+          
+          // ensure slash is only injected if insertPath is present
+          if (insertPath == '') {
+            var insertName = name 
+          } else {
+            var insertName = insertPath + '/' + name
+          }
 
           // Add the file into the first zip
-          zip1.file(insertPath + '/' + name, content, {
+          zip1.file(insertName, content, {
             date: file.date,
             unixPermissions: file.unixPermissions,
             dosPermissions: file.dosPermissions,
